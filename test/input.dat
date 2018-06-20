@@ -1,0 +1,18 @@
+1	#number of vibrations in A+
+1	#number of vibrations in B
+1	#number of vibrations in A
+1	#number of vibrations in B+
+
+6500.0	#SPE of A+ (cm-1)
+0.0	#SPE of B  (cm-1)
+3500.0	#SPE of A  (cm-1)
+2000.0	#SPE of B+ (cm-1)
+
+500.0	#Energy toleratnce (cm-1)
+1000.0	#Initial internal energy of A(+) + B (cm-1)
+
+0	#flag for harmonic vs external energy levels
+10	#max quantum number to consider
+
+#options
+energy levles: 0 - harmonic, 2 - vpt2, 3 - external
