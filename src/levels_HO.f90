@@ -104,8 +104,19 @@
     CALL hash_qinit_1Dint4_bool(A,B,C,l1,l2)
 
     !open unformatted binary file for writing
-    OPEN(unit=2,file='A+Blevels',status='replace',access='sequential',form='unformatted')
+    OPEN(unit=2,file="A+B.bin",status='replace',access='sequential',form='unformatted')
     CALL enumerate_HO(N0,W0,ids(0,:),A,B,C,Esys+Eint+Etol,Etot+Eint-Etol,Esys,0,nall,ngood,l1,l2)
+    CLOSE(unit=2)
+
+    !write results to non binary file
+    OPEN(unit=3,file="A+Blevels",status='replace',access='sequential')
+    OPEN(unit=2,file="A+B.bin",status='old',access='sequential',form='unformatted')
+    WRITE(3,*)  "A+ :", nvib(0), "B :", nvib(1) 
+    DO i=0,ngood-1
+      READ(2) N0
+      WRITE(3,*) N0
+    END DO
+    CLOSE(unit=3)
     CLOSE(unit=2)
 
     CALL CPU_TIME(t2)

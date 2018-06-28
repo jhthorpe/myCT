@@ -1,4 +1,4 @@
-myutil=/home/james.thorpe/bin/myUtils/lib
+myutil=/Users/jamesthorpe/local-hbar/myUtils/lib
 FC=gfortran
 FFLAGS= -fcheck=bounds -g
 

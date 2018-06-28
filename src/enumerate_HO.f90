@@ -56,55 +56,60 @@ RECURSIVE SUBROUTINE enumerate_HO(N,Wi,ids,A,B,C,Eu,El,Es,idx,nall,ngood,l1,l2)
   !1) we have seen this index before 
   CALL hash_qsearch_1Dint4_bool(A,B,C,N,val,hash,l1,val,hash_1Dint4)
   IF (val) THEN
-    write(*,*) "seen before"
     RETURN
   END IF
     
   !2) we are below zero anywhere
   IF (MINVAL(N) .LT. 0) THEN
-    WRITE(*,*) "lt 0 at N=",N
     RETURN
   END IF
 
+  !3) check if we lost energy from vpt breaking
+
   Ev = energy_HO(N,Wi,l2)
 
-  !3) we are outside the upper energy bounds
+  !4) we are outside the upper energy bounds
   IF ( Eu .LT. (Es + Ev) ) THEN
     val = .FALSE.
     CALL hash_qinsert_1Dint4_bool(A,B,C,N,val,hash,l1,nall,hash_1Dint4)
     newN = N
     DO i=0,l2-1
-      newN(i) = N(i)-1
+      newN(i) = N(i)-1 !search down
       CALL enumerate_HO(newN,Wi,ids,A,B,C,Eu,El,Es,i,nall,ngood,l1,l2)
       newN(i) = newN(i) + 1 
     END DO
     RETURN
 
-  !4) we are outside the lower energy bounds
+  !5) we are outside the lower energy bounds
   ELSE IF ( El .GT. (Es + Ev)) THEN
-    write(*,*) "below"
-    STOP
-
-  !5) we lost energy somewhere - include this test later
-      
-
+    val = .FALSE.
+    CALL hash_qinsert_1Dint4_bool(A,B,C,N,val,hash,l1,nall,hash_1Dint4)
+    newN = N
+    DO i=0,l2-1
+      newN(i) = N(i) + 1  !search up
+      CALL enumerate_HO(newN,Wi,ids,A,B,C,Eu,El,Es,i,nall,ngood,l1,l2)
+      newN(i) = N(i) - 1
+    END DO
+    RETURN
 
   ELSE
 
-  !go through all index
+  !6) we're in range, explore whole area
+    ngood = ngood + 1
+    val = .TRUE.
+    CALL hash_qinsert_1Dint4_bool(A,B,C,N,val,hash,l1,nall,hash_1Dint4)
     newN = N
+    WRITE(2) newN
     DO i=0,l2-1
       newN(i) = N(i)+1  !search up
-!     CALL enumerate_HO(newN,Wi,ids,Y,Eu,El,Ep,i,a,b,l1,l2)
+      CALL enumerate_HO(newN,Wi,ids,A,B,C,Eu,El,Es,i,nall,ngood,l1,l2)
       newN(i) = newN(i)-2 !search down
-!     CALL enumerate_HO(newN,Wi,ids,Y,Eu,El,Ep,i,a,b,l1,l2)
+      CALL enumerate_HO(newN,Wi,ids,A,B,C,Eu,El,Es,i,nall,ngood,l1,l2)
       newN(i) = newN(i) + 1
     END DO
     RETURN
 
-
   END IF
-
 
 
 END SUBROUTINE enumerate_HO
