@@ -8,7 +8,7 @@
 3500.0	#SPE of A  (cm-1)
 2000.0	#SPE of B+ (cm-1)
 
-500.0	#Energy toleratnce (cm-1)
+10.0	#Energy toleratnce (cm-1)
 1000.0	#Initial internal energy of A(+) + B (cm-1)
 
 0	#vibrational energy treatment, see options

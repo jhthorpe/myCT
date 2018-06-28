@@ -29,11 +29,11 @@
     IMPLICIT NONE
 
     INTERFACE
-      SUBROUTINE init_HO(Wi,nvib,Et,N0)
+      SUBROUTINE init_HO(Wi,m,Et,Es,N0,Ez)
         INTEGER(KIND=4), DIMENSION(0:), INTENT(INOUT) :: N0
         REAL(KIND=8), DIMENSION(0:), INTENT(IN) :: Wi 
-        INTEGER(KIND=4), INTENT(IN) :: nvib
-        REAL(KIND=8), INTENT(IN) :: Et
+        INTEGER(KIND=4), INTENT(IN) :: m
+        REAL(KIND=8), INTENT(IN) :: Et,Es,Ez
       END SUBROUTINE init_HO
       
       SUBROUTINE enumerate_HO(N,Wi,ids,A,B,C,Eu,El,Esys,idx,nall,ngood,l1,l2)
@@ -46,6 +46,13 @@
          INTEGER(KIND=4), INTENT(IN) :: l2,idx
          REAL(KIND=8), INTENT(IN) :: Eu,El,Esys
       END SUBROUTINE enumerate_HO
+
+      REAL(KIND=8) FUNCTION energy_HO(N,W,m)
+        INTEGER(KIND=4), DIMENSION(0:), INTENT(IN) :: N
+        REAL(KIND=8), DIMENSION(0:), INTENT(IN) :: W
+        INTEGER(KIND=4), INTENT(IN) ::m
+      END FUNCTION energy_HO
+
     END INTERFACE
 
     REAL(KIND=8), PARAMETER :: tol=1.0D-16
@@ -64,7 +71,7 @@
     LOGICAL, DIMENSION(:), ALLOCATABLE :: A,C
     INTEGER(KIND=4) :: l1,l2
     INTEGER(KIND=4) :: nall,ngood
-    REAL(KIND=8) :: Etot, Esys,t1,t2
+    REAL(KIND=8) :: Etot, Esys,Ezpe,t1,t2
     INTEGER :: i,j,k
 
     CALL CPU_TIME(t1)
@@ -94,8 +101,9 @@
     IF (ALLOCATED(Ngues) ) THEN
       WRITE(*,*) "Using Ngues as intial guess vectors"
       N0(0:nvib(0)+nvib(1)-1) = Ngues(0,0:nvib(0)+nvib(1)-1)
+      Ezpe = energy_HO(N0,W0,nvib(0)+nvib(1))
     ELSE   
-      CALL init_HO(W0,nvib(0)+nvib(1),Eelc(0)+Eelc(1)+Etol-Eint,N0)
+      CALL init_HO(W0,nvib(0)+nvib(1),Eint,Esys,N0,Ezpe)
     END IF
 
     !setup hash tables
@@ -104,8 +112,11 @@
     CALL hash_qinit_1Dint4_bool(A,B,C,l1,l2)
 
     !open unformatted binary file for writing
+    WRITE(*,*) 
+    WRITE(*,*) "-----------------------------------------"
+    WRITE(*,*) "Starting recursive search" 
     OPEN(unit=2,file="A+B.bin",status='replace',access='sequential',form='unformatted')
-    CALL enumerate_HO(N0,W0,ids(0,:),A,B,C,Esys+Eint+Etol,Etot+Eint-Etol,Esys,0,nall,ngood,l1,l2)
+    CALL enumerate_HO(N0,W0,ids(0,:),A,B,C,Esys+Ezpe+Eint+Etol,Esys+Ezpe+Eint-Etol,Esys,0,nall,ngood,l1,l2)
     CLOSE(unit=2)
 
     !write results to non binary file
@@ -114,7 +125,7 @@
     WRITE(3,*)  "A+ :", nvib(0), "B :", nvib(1) 
     DO i=0,ngood-1
       READ(2) N0
-      WRITE(3,*) N0
+      WRITE(3,*) N0, Eint+Ezpe-energy_HO(N0,W0,nvib(0)+nvib(1))
     END DO
     CLOSE(unit=3)
     CLOSE(unit=2)

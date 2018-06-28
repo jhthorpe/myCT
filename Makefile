@@ -1,6 +1,7 @@
 myutil=/Users/jamesthorpe/local-hbar/myUtils/lib
 FC=gfortran
-FFALGS= -fcheck=bounds
+#FC=ifort
+FFALGS= -fcheck=bounds -O3
 
 BIN_DIR=./bin
 SRC_DIR=./src

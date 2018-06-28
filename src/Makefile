@@ -1,6 +1,7 @@
 myutil=/Users/jamesthorpe/local-hbar/myUtils/lib
 FC=gfortran
-FFLAGS= -fcheck=bounds -g
+#FC=ifort
+FFLAGS= -fcheck=bounds -O3
 
 objects = input.o energy_HO.o energy_VPT2.o hash_1Dint4.o enumerate_HO.o levels_HO.o init_HO.o
 
