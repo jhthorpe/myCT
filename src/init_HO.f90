@@ -30,9 +30,8 @@ SUBROUTINE init_HO(W,m,Ei,Es,N0,Ez)
 
   INTEGER(KIND=4), DIMENSION(0:), INTENT(INOUT) :: N0
   REAL(KIND=8), DIMENSION(0:), INTENT(IN) :: W
-  REAL(KIND=8), INTENT(INOUT) :: Ez
   INTEGER(KIND=4), INTENT(IN) :: m
-  REAL(KIND=8), INTENT(IN) :: Ei,Es
+  REAL(KIND=8), INTENT(IN) :: Ei,Es,Ez
 
   INTEGER(KIND=4) :: i,j,n
   REAL(KIND=8) :: Ev,Et
@@ -42,7 +41,6 @@ SUBROUTINE init_HO(W,m,Ei,Es,N0,Ez)
 
   !First, find the zero point energy
   N0 = 0
-  Ez = energy_HO(N0,W,m) 
   Et = Es + Ez + Ei
 
   !Second, find the smallest vib mode

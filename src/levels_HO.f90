@@ -67,12 +67,16 @@
     INTEGER(KIND=4), DIMENSION(0:nvib(0)+nvib(1)-1) :: N0
     INTEGER(KIND=4), DIMENSION(0:nvib(2)+nvib(3)-1) :: N1
     REAL(KIND=8), DIMENSION(0:nvib(0)+nvib(1)-1) :: W0
+    REAL(KIND=8), DIMENSION(0:nvib(2)+nvib(3)-1) :: W1
     INTEGER(KIND=4), DIMENSION(:,:), ALLOCATABLE :: ids,B
     LOGICAL, DIMENSION(:), ALLOCATABLE :: A,C
     INTEGER(KIND=4) :: l1,l2
     INTEGER(KIND=4) :: nall,ngood
-    REAL(KIND=8) :: Etot, Esys,Ezpe,t1,t2
+    REAL(KIND=8) :: Etot, Esys,Ezpe,t1,t2,t3
     INTEGER :: i,j,k
+
+    !-------------------------
+    ! Let's start with  A(+) + B
 
     CALL CPU_TIME(t1)
 
@@ -82,14 +86,11 @@
     ngood = 0
 
     !assign IDs and move frequencies
+    ALLOCATE(ids(0:1,0:2*MAXVAL(nvib)-1))
     W0(0:nvib(0)-1) = Wi(0,0:nvib(0)-1) 
     W0(nvib(0):nvib(0)+nvib(1)-1) = Wi(1,0:nvib(1)-1)
-
-    ALLOCATE(ids(0:1,0:2*MAXVAL(nvib)-1))
     ids(0,0:nvib(0)-1) = (/ (0, i=0, nvib(0)-1) /)
     ids(0,nvib(0):nvib(0)+nvib(1)-1) = (/ (1, i=0, nvib(1)-1) /)
-    ids(1,0:nvib(2)-1) = (/ (2, i=0, nvib(2)-1) /)
-    ids(1,nvib(2):nvib(2)+nvib(3)-1) = (/ (3, i=0, nvib(3)-1) /)
 
     !Find starting point for the calculation of A+ & B levels
     WRITE(*,*) "-----------------------------------------"
@@ -98,20 +99,24 @@
     Esys = Eelc(0) + Eelc(1)
 
     ! If a user guess was given...
+    N0 = 0
+    Ezpe = energy_HO(N0,W0,nvib(0)+nvib(1))
     IF (ALLOCATED(Ngues) ) THEN
       WRITE(*,*) "Using Ngues as intial guess vectors"
       N0(0:nvib(0)+nvib(1)-1) = Ngues(0,0:nvib(0)+nvib(1)-1)
-      Ezpe = energy_HO(N0,W0,nvib(0)+nvib(1))
     ELSE   
       CALL init_HO(W0,nvib(0)+nvib(1),Eint,Esys,N0,Ezpe)
     END IF
 
+    !total energy of reactants
+    Etot = Esys + Ezpe + Eint
+
     !setup hash tables
-    l1 = 1000
+    l1 = 10*(nvib(0)+nvib(1))
     l2 = nvib(0)+nvib(1)
     CALL hash_qinit_1Dint4_bool(A,B,C,l1,l2)
 
-    !open unformatted binary file for writing
+    !open unformatted binary file for writing, and do search
     WRITE(*,*) 
     WRITE(*,*) "-----------------------------------------"
     WRITE(*,*) "Starting recursive search" 
@@ -122,14 +127,17 @@
     !write results to non binary file
     OPEN(unit=3,file="A+Blevels",status='replace',access='sequential')
     OPEN(unit=2,file="A+B.bin",status='old',access='sequential',form='unformatted')
-    WRITE(3,*)  "A+ :", nvib(0), "B :", nvib(1) 
+    WRITE(3,*)  "A+ #vibs :", nvib(0), "B #vibs :", nvib(1) 
     DO i=0,ngood-1
       READ(2) N0
-      WRITE(3,*) N0, Eint+Ezpe-energy_HO(N0,W0,nvib(0)+nvib(1))
+      WRITE(3,*) N0, Esys+energy_HO(N0,W0,nvib(0)+nvib(1))
     END DO
     CLOSE(unit=3)
     CLOSE(unit=2)
 
+    DEALLOCATE(A)
+    DEALLOCATE(B)
+    DEALLOCATE(C)
     CALL CPU_TIME(t2)
 
     WRITE(*,*)
@@ -137,6 +145,69 @@
     WRITE(*,*) "Total levels considered :", nall
     WRITE(*,*) "Total levels in range   :", ngood
     WRITE(*,*) "-----------------------------------------"
+
+    !-------------------------
+    ! Now for A + B(+)
+    nall = 0
+    ngood = 0
+
+    !assign IDs and move frequencies
+    ids(1,0:nvib(2)-1) = (/ (2, i=0, nvib(2)-1) /)
+    ids(1,nvib(2):nvib(2)+nvib(3)-1) = (/ (3, i=0, nvib(3)-1) /)
+    W1(0:nvib(0)-1) = Wi(2,0:nvib(2)-1) 
+    W1(nvib(2):nvib(2)+nvib(3)-1) = Wi(3,0:nvib(3)-1)
+
+    !Find starting point for the calculation of A+ & B levels
+    WRITE(*,*) "-----------------------------------------"
+    WRITE(*,*) "Starting search for levels of A+ and B"
+
+    Esys = Eelc(2) + Eelc(3)
+
+    ! If a user guess was given...
+    N1 = 0
+    Ezpe = energy_HO(N1,W1,nvib(2)+nvib(3))
+    IF (ALLOCATED(Ngues) ) THEN
+      WRITE(*,*) "Using Ngues as intial guess vectors"
+      N1(0:nvib(2)+nvib(3)-1) = Ngues(1,0:nvib(2)+nvib(3)-1)
+    ELSE   
+      CALL init_HO(W1,nvib(2)+nvib(3),Etot-Esys-Ezpe,Esys,N1,Ezpe)
+    END IF
+
+    !setup hash tables
+    l1 = 10*(nvib(2)+nvib(3))
+    l2 = nvib(2)+nvib(3)
+    CALL hash_qinit_1Dint4_bool(A,B,C,l1,l2)
+
+    !open unformatted binary file for writing, and do search
+    WRITE(*,*) 
+    WRITE(*,*) "-----------------------------------------"
+    WRITE(*,*) "Starting recursive search" 
+    OPEN(unit=2,file="AB+.bin",status='replace',access='sequential',form='unformatted')
+    CALL enumerate_HO(N1,W1,ids(1,:),A,B,C,Etot+Etol,Etot-Etol,Esys,0,nall,ngood,l1,l2)
+    CLOSE(unit=2)
+
+    !write results to non binary file
+    OPEN(unit=3,file="AB+levels",status='replace',access='sequential')
+    OPEN(unit=2,file="AB+.bin",status='old',access='sequential',form='unformatted')
+    WRITE(3,*)  "A #vibs :", nvib(2), "B+ #vibs :", nvib(3) 
+    DO i=0,ngood-1
+      READ(2) N1
+      WRITE(3,*) N1, Esys+energy_HO(N1,W1,nvib(2)+nvib(3))
+    END DO
+    CLOSE(unit=3)
+    CLOSE(unit=2)
+
+    DEALLOCATE(A)
+    DEALLOCATE(B)
+    DEALLOCATE(C)
+    CALL CPU_TIME(t3)
+
+    WRITE(*,*)
+    WRITE(*,*) "A + B(+) finished in (s)", t3-t2
+    WRITE(*,*) "Total levels considered :", nall
+    WRITE(*,*) "Total levels in range   :", ngood
+    WRITE(*,*) "-----------------------------------------"
+
 
     DEALLOCATE(ids)
 
