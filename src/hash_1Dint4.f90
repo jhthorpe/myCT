@@ -1,0 +1,11 @@
+INTEGER(KIND=4) FUNCTION hash_1Dint4(A)
+  IMPLICIT NONE
+
+  INTEGER(KIND=4), DIMENSION(0:), INTENT(IN) :: A
+  INTEGER(KIND=4) :: val
+
+  val = SUM(A)
+
+  hash_1Dint4 = val
+
+END FUNCTION hash_1Dint4 

@@ -2,77 +2,109 @@
 !       !recursively aquire all the possible energy values
 !---------------------------------------------------------------------
     !Values
-    ! N         :       1D int, list of quantum numbers
+    ! N         :       1D int, list of current quantum numbers
     ! Wi        :       1D dp, list of HO fundementals 
-    ! X         :       1D int, list of ids
-    ! Y         :       2D bool, truth table for if we've considered a
-    ! point
+    ! ids       :       1D int, list of ids
+    ! A         :       1D bool, hash table truth table
+    ! B         :       2D int4, hash table keys
+    ! C         :       1D bool, hash table vals
     ! Eu        :       dp, upper energy limit
     ! El        :       dp, lower energy limit
-    ! Ep        :       dp, energy passed down to us
+    ! Es      :       dp, sum of electronic energy 
     ! idx       :       int, which index in W we are working on now
-    ! a         :       int, number of values considered
-    ! b         :       int, number of energies accepted
+    ! nall      :       int, number of values considered
+    ! ngoo      :       int, number of energies accepted
     ! m         :       int, number of vibrational modes 
 
-  RECURSIVE SUBROUTINE enumerate_HO(N,Wi,X,Y,Eu,El,Ep,idx,a,b,m)
-    IMPLICIT NONE
-    EXTERNAL energy_HO
-  
+RECURSIVE SUBROUTINE enumerate_HO(N,Wi,ids,A,B,C,Eu,El,Es,idx,nall,ngood,l1,l2)
+  USE myUtils
+
+  IMPLICIT NONE
+
+  INTERFACE
+    REAL(KIND=8) FUNCTION energy_HO(N,W,m)
+      INTEGER(KIND=4), DIMENSION(0:), INTENT(IN) :: N
+      REAL(KIND=8), DIMENSION(0:), INTENT(IN) :: W
+      INTEGER(KIND=4), INTENT(IN) ::m
+    END FUNCTION energy_HO
     
-    REAL(KIND=8), PARAMETER :: tol=1.0D-16
+    INTEGER(KIND=4) FUNCTION hash_1Dint4(A)
+      INTEGER(KIND=4),DIMENSION(0:),INTENT(IN) :: A
+    END FUNCTION hash_1Dint4
+  END INTERFACE
+  
+  REAL(KIND=8), PARAMETER :: tol=1.0D-16
 
-    LOGICAL, DIMENSION(:,:), ALLOCATABLE, INTENT(INOUT) :: Y
-    INTEGER(KIND=4), DIMENSION(0:), INTENT(INOUT) :: N
-    INTEGER(KIND=4),DIMENSION(0:), INTENT(IN) :: X
-    REAL(KIND=8), DIMENSION(0:), INTENT(IN) :: Wi
-    INTEGER(KIND=4), INTENT(INOUT) :: a,b
-    INTEGER(KIND=4), INTENT(IN) :: m,idx
-    REAL(KIND=8), INTENT(IN) :: Eu,El,Ep
+  INTEGER(KIND=4), DIMENSION(:,:), ALLOCATABLE, INTENT(INOUT) :: B
+  LOGICAL(KIND=4), DIMENSION(:), ALLOCATABLE, INTENT(INOUT) :: A,C 
+    
+  INTEGER(KIND=4), DIMENSION(0:), INTENT(INOUT) :: N
+  INTEGER(KIND=4),DIMENSION(0:), INTENT(IN) :: ids
+  REAL(KIND=8), DIMENSION(0:), INTENT(IN) :: Wi
+  INTEGER(KIND=4), INTENT(INOUT) :: nall,ngood,l1
+  INTEGER(KIND=4), INTENT(IN) :: l2,idx
+  REAL(KIND=8), INTENT(IN) :: Eu,El,Es
 
-    INTEGER(KIND=4), DIMENSION(0:m-1) :: newN
-    INTEGER(KIND=4) :: nmax,ulim,llim
-    INTEGER(KIND=4) :: i,j,k
-    REAL(KIND=8) :: Er,energy_HO
+  INTEGER(KIND=4), DIMENSION(0:l2-1) :: newN
+  INTEGER(KIND=4) :: i,j, hash
+  REAL(KIND=8) :: Ev
+  LOGICAL :: val
 
-    ulim = UBOUND(Y,2)
-    llim = LBOUND(Y,2)
-    Er = energy_HO(N,Wi,m)
+  !base cases
+  hash =  hash_1Dint4(N)
 
-    !base cases
+  !1) we have seen this index before 
+  CALL hash_qsearch_1Dint4_bool(A,B,C,N,val,hash,l1,val,hash_1Dint4)
+  IF (val) THEN
+    write(*,*) "seen before"
+    RETURN
+  END IF
+    
+  !2) we are below zero anywhere
+  IF (MINVAL(N) .LT. 0) THEN
+    WRITE(*,*) "lt 0 at N=",N
+    RETURN
+  END IF
 
+  Ev = energy_HO(N,Wi,l2)
 
-    !1) we are below zero anywhere
-    IF (MINVAL(N) .LT. 0) THEN
-      WRITE(*,*) "lt 0 at N=",N
-      RETURN
-
-    !2) we have seen this index before 
-
-    !1) we are out of bounds of Y0
-
-
-    !3) we are outside the upper energy bounds
-
-
-    !4) we are outside the lower energy bounds
-
-
-    ELSE
-
-    !go through all index
-      DO i=0,m-1
-        newN(:) = N(:)
-        newN(i) = N(i)+1
-        CALL enumerate_HO(newN,Wi,X,Y,Eu,El,Ep,i,a,b,m)
-        newN(i) = N(i)-1
-        CALL enumerate_HO(newN,Wi,X,Y,Eu,El,Ep,i,a,b,m)
-      END DO
-
-
-    END IF
-
-
+  !3) we are outside the upper energy bounds
+  IF ( Eu .LT. (Es + Ev) ) THEN
+    val = .FALSE.
+    CALL hash_qinsert_1Dint4_bool(A,B,C,N,val,hash,l1,nall,hash_1Dint4)
+    newN = N
+    DO i=0,l2-1
+      newN(i) = N(i)-1
+      CALL enumerate_HO(newN,Wi,ids,A,B,C,Eu,El,Es,i,nall,ngood,l1,l2)
+      newN(i) = newN(i) + 1 
+    END DO
     RETURN
 
-  END SUBROUTINE enumerate_HO
+  !4) we are outside the lower energy bounds
+  ELSE IF ( El .GT. (Es + Ev)) THEN
+    write(*,*) "below"
+    STOP
+
+  !5) we lost energy somewhere - include this test later
+      
+
+
+  ELSE
+
+  !go through all index
+    newN = N
+    DO i=0,l2-1
+      newN(i) = N(i)+1  !search up
+!     CALL enumerate_HO(newN,Wi,ids,Y,Eu,El,Ep,i,a,b,l1,l2)
+      newN(i) = newN(i)-2 !search down
+!     CALL enumerate_HO(newN,Wi,ids,Y,Eu,El,Ep,i,a,b,l1,l2)
+      newN(i) = newN(i) + 1
+    END DO
+    RETURN
+
+
+  END IF
+
+
+
+END SUBROUTINE enumerate_HO

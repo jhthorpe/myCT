@@ -12,11 +12,13 @@
     ! Eint      :       dp, intitial internal energy
     ! mqm       :       int, max quantum number
     ! options   :       1D int, list of options
+    ! Ngues     :       2D int4, initial guess array [rcts/prds,levels]
 
-  SUBROUTINE input(nvib,Eelc,Etol,Wi,names,Eint,mqm,options)
+  SUBROUTINE input(nvib,Eelc,Etol,Wi,names,Eint,mqm,options,Ngues)
 
     IMPLICIT NONE
 
+    INTEGER(KIND=4), DIMENSION(:,:), ALLOCATABLE, INTENT(INOUT) :: Ngues
     REAL(KIND=8), DIMENSION(:,:), ALLOCATABLE, INTENT(INOUT) :: Wi
     INTEGER(KIND=4), DIMENSION(0:), INTENT(INOUT) :: nvib
     CHARACTER(LEN=2), DIMENSION(0:), INTENT(IN) :: names
@@ -26,6 +28,7 @@
     REAL(KIND=8), INTENT(INOUT) :: Etol,Eint
     INTEGER, INTENT(INOUT) :: mqm
 
+    LOGICAL :: ex
     INTEGER :: i,j,k
 
     fnames = ['A+.dat', 'B.dat ', 'A.dat ', 'B+.dat']
@@ -51,6 +54,19 @@
     !setup arrays for fast indexing
     ALLOCATE(Wi(0:3,0:MAXVAL(nvib)-1))
 
+    !allocate Ngues and get it if exists
+    INQUIRE(file="Ngues", EXIST=ex)
+    IF (ex) THEN
+      WRITE(*,*) "Reading inital guess from Ngues"
+      ALLOCATE(Ngues(0:1,0:2*MAXVAL(nvib)-1))
+      OPEN(unit=1,file="Ngues",status="old",access="sequential")
+      READ(1,*) Ngues(0,0:nvib(0)-1)
+      READ(1,*) Ngues(0,nvib(0):nvib(0)+nvib(1)-1)
+      READ(1,*) Ngues(1,0:nvib(2)-1)
+      READ(1,*) Ngues(1,nvib(2):nvib(2)+nvib(3)-1)
+      CLOSE(unit=1)
+    END IF
+
     !get harmonic frequencies
     IF (options(0) .EQ. 0) THEN
       DO i=0,3
@@ -68,6 +84,7 @@
       STOP
     END IF
 
+
     !print output
     WRITE(*,*)
     WRITE(*,*) "Initial Internal Energy (cm-1) : ", Eint
@@ -81,6 +98,17 @@
       END DO
       WRITE(*,*)
     END DO
+    IF (ALLOCATED(Ngues)) THEN
+      WRITE(*,*) "Initial Guess vectors"
+      WRITE(*,*) "A+ levels"
+      WRITE(*,*) Ngues(0,0:nvib(0)-1)
+      WRITE(*,*) "B levels"
+      WRITE(*,*) Ngues(0,nvib(0):nvib(0)+nvib(1)-1)
+      WRITE(*,*) "A levels"
+      WRITE(*,*) Ngues(1,0:nvib(2)-1)
+      WRITE(*,*) "B+ levels"
+      WRITE(*,*) Ngues(1,nvib(2):nvib(2)+nvib(3)-1)
+    END IF
 
   END SUBROUTINE input
 
