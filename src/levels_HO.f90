@@ -36,7 +36,7 @@
         REAL(KIND=4), INTENT(IN) :: Et,Es,Ez
       END SUBROUTINE init_HO
       
-      SUBROUTINE enumerate_HO(N,Wi,ids,A,B,C,Eu,El,Esys,idx,nall,ngood,l1,l2)
+      SUBROUTINE recall_HO(N,Wi,ids,A,B,C,Eu,El,Esys,idx,nall,ngood,l1,l2)
          INTEGER(KIND=4), DIMENSION(:,:), ALLOCATABLE, INTENT(INOUT) :: B
          LOGICAL(KIND=4), DIMENSION(:), ALLOCATABLE, INTENT(INOUT) :: A,C
          INTEGER(KIND=4), DIMENSION(0:), INTENT(INOUT) :: N
@@ -45,7 +45,7 @@
          INTEGER(KIND=4), INTENT(INOUT) :: nall,ngood,l1
          INTEGER(KIND=4), INTENT(IN) :: l2,idx
          REAL(KIND=4), INTENT(IN) :: Eu,El,Esys
-      END SUBROUTINE enumerate_HO
+      END SUBROUTINE recall_HO
 
       REAL(KIND=4) FUNCTION energy_HO(N,W,m)
         INTEGER(KIND=4), DIMENSION(0:), INTENT(IN) :: N
@@ -121,7 +121,7 @@
     WRITE(*,*) "-----------------------------------------"
     WRITE(*,*) "Starting recursive search" 
     OPEN(unit=2,file="A+B.bin",status='replace',access='sequential',form='unformatted')
-    CALL enumerate_HO(N0,W0,ids(0,:),A,B,C,Esys+Ezpe+Eint+Etol,Esys+Ezpe+Eint-Etol,Esys,0,nall,ngood,l1,l2)
+    CALL recall_HO(N0,W0,ids(0,:),A,B,C,Esys+Ezpe+Eint+Etol,Esys+Ezpe+Eint-Etol,Esys,0,nall,ngood,l1,l2)
     CLOSE(unit=2)
 
     !write results to non binary file
@@ -184,7 +184,7 @@
     WRITE(*,*) "-----------------------------------------"
     WRITE(*,*) "Starting recursive search" 
     OPEN(unit=2,file="AB+.bin",status='replace',access='sequential',form='unformatted')
-    CALL enumerate_HO(N1,W1,ids(1,:),A,B,C,Etot+Etol,Etot-Etol,Esys,0,nall,ngood,l1,l2)
+    CALL recall_HO(N1,W1,ids(1,:),A,B,C,Etot+Etol,Etot-Etol,Esys,0,nall,ngood,l1,l2)
     CLOSE(unit=2)
 
     !write results to non binary file

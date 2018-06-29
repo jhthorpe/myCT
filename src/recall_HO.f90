@@ -16,7 +16,7 @@
     ! ngoo      :       int, number of energies accepted
     ! m         :       int, number of vibrational modes 
 
-RECURSIVE SUBROUTINE enumerate_HO(N,Wi,ids,A,B,C,Eu,El,Es,idx,nall,ngood,l1,l2)
+RECURSIVE SUBROUTINE recall_HO(N,Wi,ids,A,B,C,Eu,El,Es,idx,nall,ngood,l1,l2)
   USE myUtils
 
   IMPLICIT NONE
@@ -75,7 +75,7 @@ RECURSIVE SUBROUTINE enumerate_HO(N,Wi,ids,A,B,C,Eu,El,Es,idx,nall,ngood,l1,l2)
     newN = N
     DO i=0,l2-1
       newN(i) = N(i)-1 !search down
-      CALL enumerate_HO(newN,Wi,ids,A,B,C,Eu,El,Es,i,nall,ngood,l1,l2)
+      CALL recall_HO(newN,Wi,ids,A,B,C,Eu,El,Es,i,nall,ngood,l1,l2)
       newN(i) = newN(i) + 1 
     END DO
     RETURN
@@ -87,7 +87,7 @@ RECURSIVE SUBROUTINE enumerate_HO(N,Wi,ids,A,B,C,Eu,El,Es,idx,nall,ngood,l1,l2)
     newN = N
     DO i=0,l2-1
       newN(i) = N(i) + 1  !search up
-      CALL enumerate_HO(newN,Wi,ids,A,B,C,Eu,El,Es,i,nall,ngood,l1,l2)
+      CALL recall_HO(newN,Wi,ids,A,B,C,Eu,El,Es,i,nall,ngood,l1,l2)
       newN(i) = N(i) - 1
     END DO
     RETURN
@@ -102,9 +102,9 @@ RECURSIVE SUBROUTINE enumerate_HO(N,Wi,ids,A,B,C,Eu,El,Es,idx,nall,ngood,l1,l2)
     WRITE(2) newN
     DO i=0,l2-1
       newN(i) = N(i)+1  !search up
-      CALL enumerate_HO(newN,Wi,ids,A,B,C,Eu,El,Es,i,nall,ngood,l1,l2)
+      CALL recall_HO(newN,Wi,ids,A,B,C,Eu,El,Es,i,nall,ngood,l1,l2)
       newN(i) = newN(i)-2 !search down
-      CALL enumerate_HO(newN,Wi,ids,A,B,C,Eu,El,Es,i,nall,ngood,l1,l2)
+      CALL recall_HO(newN,Wi,ids,A,B,C,Eu,El,Es,i,nall,ngood,l1,l2)
       newN(i) = newN(i) + 1
     END DO
     RETURN
@@ -112,4 +112,4 @@ RECURSIVE SUBROUTINE enumerate_HO(N,Wi,ids,A,B,C,Eu,El,Es,idx,nall,ngood,l1,l2)
   END IF
 
 
-END SUBROUTINE enumerate_HO
+END SUBROUTINE recall_HO
