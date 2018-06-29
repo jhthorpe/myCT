@@ -2,19 +2,19 @@
 !       !Find all levels that have overlapping energys 
 !---------------------------------------------------------------------
     !Values
-    ! Wi        :       2D dp, array of vibrational frequencies of
+    ! Wi        :       2D real4, array of vibrational frequencies of
     ! molecules
     ! nvib      :       1D int, array of number of vibrational modes
-    ! Eelc      :       1D dp, array of elc energies in cm-1
+    ! Eelc      :       1D real4, array of elc energies in cm-1
     ! names     :       1D chr*2, array of molecule names for
     ! convenience
-    ! Etol      :       dp, tolerance energy in cm-1
-    ! Eint      :       dp, intitial internal energy
+    ! Etol      :       real4, tolerance energy in cm-1
+    ! Eint      :       real4, intitial internal energy
     ! numcombo  :       int*8, number of valid combinations to consider
-    ! Etot      :       dp, total energy of A(+) + B in cm-1
-    ! Esys      :       dp, total energy of current combination of A +
+    ! Etot      :       real4, total energy of A(+) + B in cm-1
+    ! Esys      :       real4, total energy of current combination of A +
     ! B(+)
-    ! tol       :       dp, tolerance for equivlence of two reals
+    ! tol       :       real4, tolerance for equivlence of two reals
     ! a,b       :       int, number considered, number accepted
     ! mqn       :       int, max quantum number
     ! Ngues     :       1D int4, guess array of quantum numbers
@@ -31,9 +31,9 @@
     INTERFACE
       SUBROUTINE init_HO(Wi,m,Et,Es,N0,Ez)
         INTEGER(KIND=4), DIMENSION(0:), INTENT(INOUT) :: N0
-        REAL(KIND=8), DIMENSION(0:), INTENT(IN) :: Wi 
+        REAL(KIND=4), DIMENSION(0:), INTENT(IN) :: Wi 
         INTEGER(KIND=4), INTENT(IN) :: m
-        REAL(KIND=8), INTENT(IN) :: Et,Es,Ez
+        REAL(KIND=4), INTENT(IN) :: Et,Es,Ez
       END SUBROUTINE init_HO
       
       SUBROUTINE enumerate_HO(N,Wi,ids,A,B,C,Eu,El,Esys,idx,nall,ngood,l1,l2)
@@ -41,38 +41,38 @@
          LOGICAL(KIND=4), DIMENSION(:), ALLOCATABLE, INTENT(INOUT) :: A,C
          INTEGER(KIND=4), DIMENSION(0:), INTENT(INOUT) :: N
          INTEGER(KIND=4),DIMENSION(0:), INTENT(IN) :: ids
-         REAL(KIND=8), DIMENSION(0:), INTENT(IN) :: Wi
+         REAL(KIND=4), DIMENSION(0:), INTENT(IN) :: Wi
          INTEGER(KIND=4), INTENT(INOUT) :: nall,ngood,l1
          INTEGER(KIND=4), INTENT(IN) :: l2,idx
-         REAL(KIND=8), INTENT(IN) :: Eu,El,Esys
+         REAL(KIND=4), INTENT(IN) :: Eu,El,Esys
       END SUBROUTINE enumerate_HO
 
-      REAL(KIND=8) FUNCTION energy_HO(N,W,m)
+      REAL(KIND=4) FUNCTION energy_HO(N,W,m)
         INTEGER(KIND=4), DIMENSION(0:), INTENT(IN) :: N
-        REAL(KIND=8), DIMENSION(0:), INTENT(IN) :: W
+        REAL(KIND=4), DIMENSION(0:), INTENT(IN) :: W
         INTEGER(KIND=4), INTENT(IN) ::m
       END FUNCTION energy_HO
 
     END INTERFACE
 
-    REAL(KIND=8), PARAMETER :: tol=1.0D-16
+    REAL(KIND=4), PARAMETER :: tol=1.0E-8
 
     INTEGER(KIND=4), DIMENSION(:,:), ALLOCATABLE, INTENT(IN) :: Ngues
     CHARACTER(LEN=2), DIMENSION(0:), INTENT(IN) :: names
     INTEGER(KIND=4), DIMENSION(0:), INTENT(IN) :: nvib
-    REAL(KIND=8), DIMENSION(0:,0:), INTENT(IN) :: Wi
-    REAL(KIND=8), DIMENSION(0:), INTENT(IN) :: Eelc
-    REAL(KIND=8), INTENT(IN) :: Etol,Eint
+    REAL(KIND=4), DIMENSION(0:,0:), INTENT(IN) :: Wi
+    REAL(KIND=4), DIMENSION(0:), INTENT(IN) :: Eelc
+    REAL(KIND=4), INTENT(IN) :: Etol,Eint
 
     INTEGER(KIND=4), DIMENSION(0:nvib(0)+nvib(1)-1) :: N0
     INTEGER(KIND=4), DIMENSION(0:nvib(2)+nvib(3)-1) :: N1
-    REAL(KIND=8), DIMENSION(0:nvib(0)+nvib(1)-1) :: W0
-    REAL(KIND=8), DIMENSION(0:nvib(2)+nvib(3)-1) :: W1
+    REAL(KIND=4), DIMENSION(0:nvib(0)+nvib(1)-1) :: W0
+    REAL(KIND=4), DIMENSION(0:nvib(2)+nvib(3)-1) :: W1
     INTEGER(KIND=4), DIMENSION(:,:), ALLOCATABLE :: ids,B
     LOGICAL, DIMENSION(:), ALLOCATABLE :: A,C
     INTEGER(KIND=4) :: l1,l2
     INTEGER(KIND=4) :: nall,ngood
-    REAL(KIND=8) :: Etot, Esys,Ezpe,t1,t2,t3
+    REAL(KIND=4) :: Etot, Esys,Ezpe,t1,t2,t3
     INTEGER :: i,j,k
 
     !-------------------------
@@ -142,6 +142,7 @@
 
     WRITE(*,*)
     WRITE(*,*) "A(+) + B finished in (s)", t2-t1
+    WRITE(*,*) "At a rate of (levels/second)", nall/(t2-t1)
     WRITE(*,*) "Total levels considered :", nall
     WRITE(*,*) "Total levels in range   :", ngood
     WRITE(*,*) "-----------------------------------------"
@@ -159,7 +160,7 @@
 
     !Find starting point for the calculation of A+ & B levels
     WRITE(*,*) "-----------------------------------------"
-    WRITE(*,*) "Starting search for levels of A+ and B"
+    WRITE(*,*) "Starting search for levels of A and B+"
 
     Esys = Eelc(2) + Eelc(3)
 
@@ -204,6 +205,7 @@
 
     WRITE(*,*)
     WRITE(*,*) "A + B(+) finished in (s)", t3-t2
+    WRITE(*,*) "At a rate of (levels/second)", nall/(t3-t2)
     WRITE(*,*) "Total levels considered :", nall
     WRITE(*,*) "Total levels in range   :", ngood
     WRITE(*,*) "-----------------------------------------"

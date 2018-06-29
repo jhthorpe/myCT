@@ -3,14 +3,14 @@
 !---------------------------------------------------------------------
     !Values
     ! N         :       1D int, list of current quantum numbers
-    ! Wi        :       1D dp, list of HO fundementals 
+    ! Wi        :       1D real4, list of HO fundementals 
     ! ids       :       1D int, list of ids
     ! A         :       1D bool, hash table truth table
     ! B         :       2D int4, hash table keys
     ! C         :       1D bool, hash table vals
-    ! Eu        :       dp, upper energy limit
-    ! El        :       dp, lower energy limit
-    ! Es      :       dp, sum of electronic energy 
+    ! Eu        :       real4, upper energy limit
+    ! El        :       real4, lower energy limit
+    ! Es      :       real4, sum of electronic energy 
     ! idx       :       int, which index in W we are working on now
     ! nall      :       int, number of values considered
     ! ngoo      :       int, number of energies accepted
@@ -22,9 +22,9 @@ RECURSIVE SUBROUTINE enumerate_HO(N,Wi,ids,A,B,C,Eu,El,Es,idx,nall,ngood,l1,l2)
   IMPLICIT NONE
 
   INTERFACE
-    REAL(KIND=8) FUNCTION energy_HO(N,W,m)
+    REAL(KIND=4) FUNCTION energy_HO(N,W,m)
       INTEGER(KIND=4), DIMENSION(0:), INTENT(IN) :: N
-      REAL(KIND=8), DIMENSION(0:), INTENT(IN) :: W
+      REAL(KIND=4), DIMENSION(0:), INTENT(IN) :: W
       INTEGER(KIND=4), INTENT(IN) ::m
     END FUNCTION energy_HO
     
@@ -33,21 +33,21 @@ RECURSIVE SUBROUTINE enumerate_HO(N,Wi,ids,A,B,C,Eu,El,Es,idx,nall,ngood,l1,l2)
     END FUNCTION hash_1Dint4
   END INTERFACE
   
-  REAL(KIND=8), PARAMETER :: tol=1.0D-16
+  REAL(KIND=4), PARAMETER :: tol=1.0E-8
 
   INTEGER(KIND=4), DIMENSION(:,:), ALLOCATABLE, INTENT(INOUT) :: B
   LOGICAL(KIND=4), DIMENSION(:), ALLOCATABLE, INTENT(INOUT) :: A,C 
     
   INTEGER(KIND=4), DIMENSION(0:), INTENT(INOUT) :: N
   INTEGER(KIND=4),DIMENSION(0:), INTENT(IN) :: ids
-  REAL(KIND=8), DIMENSION(0:), INTENT(IN) :: Wi
+  REAL(KIND=4), DIMENSION(0:), INTENT(IN) :: Wi
   INTEGER(KIND=4), INTENT(INOUT) :: nall,ngood,l1
   INTEGER(KIND=4), INTENT(IN) :: l2,idx
-  REAL(KIND=8), INTENT(IN) :: Eu,El,Es
+  REAL(KIND=4), INTENT(IN) :: Eu,El,Es
 
   INTEGER(KIND=4), DIMENSION(0:l2-1) :: newN
   INTEGER(KIND=4) :: i,j, hash
-  REAL(KIND=8) :: Ev
+  REAL(KIND=4) :: Ev
   LOGICAL :: val
 
   !base cases

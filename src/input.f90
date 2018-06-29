@@ -2,14 +2,14 @@
 !               Get input and print it 
 !---------------------------------------------------------------------
     !Values
-    ! Wi        :       2D dp, array of vibrational frequencies of
+    ! Wi        :       2D real4, array of vibrational frequencies of
     ! molecules
     ! nvib      :       1D int, array of number of vibrational modes
-    ! Eelc      :       1D dp, array of elc energies in cm-1
+    ! Eelc      :       1D real4, array of elc energies in cm-1
     ! names     :       1D chr*2, array of molecule names for
     ! convenience
-    ! Etol      :       dp, tolerance energy in cm-1
-    ! Eint      :       dp, intitial internal energy
+    ! Etol      :       real4, tolerance energy in cm-1
+    ! Eint      :       real4, intitial internal energy
     ! mqm       :       int, max quantum number
     ! options   :       1D int, list of options
     ! Ngues     :       2D int4, initial guess array [rcts/prds,levels]
@@ -19,13 +19,13 @@
     IMPLICIT NONE
 
     INTEGER(KIND=4), DIMENSION(:,:), ALLOCATABLE, INTENT(INOUT) :: Ngues
-    REAL(KIND=8), DIMENSION(:,:), ALLOCATABLE, INTENT(INOUT) :: Wi
+    REAL(KIND=4), DIMENSION(:,:), ALLOCATABLE, INTENT(INOUT) :: Wi
     INTEGER(KIND=4), DIMENSION(0:), INTENT(INOUT) :: nvib
     CHARACTER(LEN=2), DIMENSION(0:), INTENT(IN) :: names
-    REAL(KIND=8), DIMENSION(0:), INTENT(INOUT) :: Eelc
+    REAL(KIND=4), DIMENSION(0:), INTENT(INOUT) :: Eelc
     INTEGER, DIMENSION(0:), INTENT(INOUT) :: options
     CHARACTER(LEN=6), DIMENSION(0:3) :: fnames
-    REAL(KIND=8), INTENT(INOUT) :: Etol,Eint
+    REAL(KIND=4), INTENT(INOUT) :: Etol,Eint
     INTEGER, INTENT(INOUT) :: mqm
 
     LOGICAL :: ex

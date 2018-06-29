@@ -8,19 +8,19 @@
 
     !vector vector operations?
 
-REAL(KIND=8) FUNCTION energy_HO(N,W,m)
+REAL(KIND=4) FUNCTION energy_HO(N,W,m)
 
   IMPLICIT NONE
 
   INTEGER(KIND=4), DIMENSION(0:), INTENT(IN) :: N
-  REAL(KIND=8), DIMENSION(0:), INTENT(IN) :: W
+  REAL(KIND=4), DIMENSION(0:), INTENT(IN) :: W
   INTEGER(KIND=4), INTENT(IN) ::m
-  REAL(KIND=8) :: temp
+  REAL(KIND=4) :: temp
   INTEGER :: i
 
-  temp = 0.0D0
+  temp = 0.0E0
   DO i=0,m-1
-    temp = temp + (N(i)+0.5D0)*W(i)
+    temp = temp + (N(i)+0.5E0)*W(i)
   END DO
 
   energy_HO = temp

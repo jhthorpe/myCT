@@ -1,4 +1,4 @@
-myutil=/Users/jamesthorpe/local-hbar/myUtils/lib
+myutil=/home/james.thorpe/bin/myUtils/lib
 FC=gfortran
 #FC=ifort
 FFALGS= -fcheck=bounds -O3
@@ -18,7 +18,7 @@ all:
 		fi; \
 	done;
 	if [ ! -d $(BIN_DIR) ]; then mkdir -p $(BIN_DIR); fi 
-	cp $(SRC_DIR)/myCT $(BIN_DIR)
+	mv $(SRC_DIR)/myCT $(BIN_DIR)
 
 clean:
 	rm -f $(SRC_DIR)/*.o myCT
