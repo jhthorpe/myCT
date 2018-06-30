@@ -17,6 +17,7 @@
     ! m         :       int, number of vibrational modes 
 
 RECURSIVE SUBROUTINE recall_HO(N,Wi,ids,A,B,C,Eu,El,Es,idx,nall,ngood,l1,l2)
+!RECURSIVE SUBROUTINE recall_HO(N,Wi,ids,A,B,C,Eu,El,Es,idx,nall,ngood,l1,l2,col)
   USE myUtils
 
   IMPLICIT NONE
@@ -41,21 +42,20 @@ RECURSIVE SUBROUTINE recall_HO(N,Wi,ids,A,B,C,Eu,El,Es,idx,nall,ngood,l1,l2)
   INTEGER(KIND=4), DIMENSION(0:), INTENT(INOUT) :: N
   INTEGER(KIND=4),DIMENSION(0:), INTENT(IN) :: ids
   REAL(KIND=4), DIMENSION(0:), INTENT(IN) :: Wi
-  INTEGER(KIND=4), INTENT(INOUT) :: nall,ngood,l1
+  INTEGER(KIND=4), INTENT(INOUT) :: nall,ngood,l1!,col
   INTEGER(KIND=4), INTENT(IN) :: l2,idx
   REAL(KIND=4), INTENT(IN) :: Eu,El,Es
 
   INTEGER(KIND=4), DIMENSION(0:l2-1) :: newN
   INTEGER(KIND=4) :: i,j, hash
   REAL(KIND=4) :: Ev
-  LOGICAL :: val
+  LOGICAL :: val,fnd
 
-  !base cases
-  hash =  hash_1Dint4(N)
+
 
   !1) we have seen this index before 
-  CALL hash_qsearch_1Dint4_bool(A,B,C,N,val,hash,l1,val,hash_1Dint4)
-  IF (val) THEN
+  CALL hash_qsearch_1Dint4_bool(A,B,C,N,val,hash,l1,fnd,hash_1Dint4)
+  IF (fnd) THEN
     RETURN
   END IF
     
@@ -72,10 +72,12 @@ RECURSIVE SUBROUTINE recall_HO(N,Wi,ids,A,B,C,Eu,El,Es,idx,nall,ngood,l1,l2)
   IF ( Eu .LT. (Es + Ev) ) THEN
     val = .FALSE.
     CALL hash_qinsert_1Dint4_bool(A,B,C,N,val,hash,l1,nall,hash_1Dint4)
+    !CALL hash_qinsert_1Dint4_bool_col(A,B,C,N,val,hash,l1,nall,hash_1Dint4,col)
     newN = N
     DO i=0,l2-1
       newN(i) = N(i)-1 !search down
       CALL recall_HO(newN,Wi,ids,A,B,C,Eu,El,Es,i,nall,ngood,l1,l2)
+      !CALL recall_HO(newN,Wi,ids,A,B,C,Eu,El,Es,i,nall,ngood,l1,l2,col)
       newN(i) = newN(i) + 1 
     END DO
     RETURN
@@ -84,10 +86,12 @@ RECURSIVE SUBROUTINE recall_HO(N,Wi,ids,A,B,C,Eu,El,Es,idx,nall,ngood,l1,l2)
   ELSE IF ( El .GT. (Es + Ev)) THEN
     val = .FALSE.
     CALL hash_qinsert_1Dint4_bool(A,B,C,N,val,hash,l1,nall,hash_1Dint4)
+    !CALL hash_qinsert_1Dint4_bool_col(A,B,C,N,val,hash,l1,nall,hash_1Dint4,col)
     newN = N
     DO i=0,l2-1
       newN(i) = N(i) + 1  !search up
       CALL recall_HO(newN,Wi,ids,A,B,C,Eu,El,Es,i,nall,ngood,l1,l2)
+      !CALL recall_HO(newN,Wi,ids,A,B,C,Eu,El,Es,i,nall,ngood,l1,l2,col)
       newN(i) = N(i) - 1
     END DO
     RETURN
@@ -98,13 +102,16 @@ RECURSIVE SUBROUTINE recall_HO(N,Wi,ids,A,B,C,Eu,El,Es,idx,nall,ngood,l1,l2)
     ngood = ngood + 1
     val = .TRUE.
     CALL hash_qinsert_1Dint4_bool(A,B,C,N,val,hash,l1,nall,hash_1Dint4)
+    !CALL hash_qinsert_1Dint4_bool_col(A,B,C,N,val,hash,l1,nall,hash_1Dint4,col)
     newN = N
     WRITE(2) newN
     DO i=0,l2-1
       newN(i) = N(i)+1  !search up
       CALL recall_HO(newN,Wi,ids,A,B,C,Eu,El,Es,i,nall,ngood,l1,l2)
+      !CALL recall_HO(newN,Wi,ids,A,B,C,Eu,El,Es,i,nall,ngood,l1,l2,col)
       newN(i) = newN(i)-2 !search down
       CALL recall_HO(newN,Wi,ids,A,B,C,Eu,El,Es,i,nall,ngood,l1,l2)
+      !CALL recall_HO(newN,Wi,ids,A,B,C,Eu,El,Es,i,nall,ngood,l1,l2,col)
       newN(i) = newN(i) + 1
     END DO
     RETURN

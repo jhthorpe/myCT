@@ -37,12 +37,13 @@
       END SUBROUTINE init_HO
       
       SUBROUTINE recall_HO(N,Wi,ids,A,B,C,Eu,El,Esys,idx,nall,ngood,l1,l2)
+      !SUBROUTINE recall_HO(N,Wi,ids,A,B,C,Eu,El,Esys,idx,nall,ngood,l1,l2,col)
          INTEGER(KIND=4), DIMENSION(:,:), ALLOCATABLE, INTENT(INOUT) :: B
          LOGICAL(KIND=4), DIMENSION(:), ALLOCATABLE, INTENT(INOUT) :: A,C
          INTEGER(KIND=4), DIMENSION(0:), INTENT(INOUT) :: N
          INTEGER(KIND=4),DIMENSION(0:), INTENT(IN) :: ids
          REAL(KIND=4), DIMENSION(0:), INTENT(IN) :: Wi
-         INTEGER(KIND=4), INTENT(INOUT) :: nall,ngood,l1
+         INTEGER(KIND=4), INTENT(INOUT) :: nall,ngood,l1!,col
          INTEGER(KIND=4), INTENT(IN) :: l2,idx
          REAL(KIND=4), INTENT(IN) :: Eu,El,Esys
       END SUBROUTINE recall_HO
@@ -71,7 +72,7 @@
     INTEGER(KIND=4), DIMENSION(:,:), ALLOCATABLE :: ids,B
     LOGICAL, DIMENSION(:), ALLOCATABLE :: A,C
     INTEGER(KIND=4) :: l1,l2
-    INTEGER(KIND=4) :: nall,ngood
+    INTEGER(KIND=4) :: nall,ngood,col
     REAL(KIND=4) :: Etot, Esys,Ezpe,t1,t2,t3
     INTEGER :: i,j,k
 
@@ -113,8 +114,11 @@
 
     !setup hash tables
     l1 = 10*(nvib(0)+nvib(1))
+    !OPEN(unit=99,file='cols',status='replace',access='sequential')
+    !col = 0
     l2 = nvib(0)+nvib(1)
     CALL hash_qinit_1Dint4_bool(A,B,C,l1,l2)
+
 
     !open unformatted binary file for writing, and do search
     WRITE(*,*) 
@@ -122,6 +126,7 @@
     WRITE(*,*) "Starting recursive search" 
     OPEN(unit=2,file="A+B.bin",status='replace',access='sequential',form='unformatted')
     CALL recall_HO(N0,W0,ids(0,:),A,B,C,Esys+Ezpe+Eint+Etol,Esys+Ezpe+Eint-Etol,Esys,0,nall,ngood,l1,l2)
+    !CALL recall_HO(N0,W0,ids(0,:),A,B,C,Esys+Ezpe+Eint+Etol,Esys+Ezpe+Eint-Etol,Esys,0,nall,ngood,l1,l2,col)
     CLOSE(unit=2)
 
     !write results to non binary file
@@ -135,6 +140,10 @@
     CLOSE(unit=3)
     CLOSE(unit=2)
 
+    !TESTING TESTING
+    CLOSE(unit=99)
+    !TESTING TESTING
+
     DEALLOCATE(A)
     DEALLOCATE(B)
     DEALLOCATE(C)
@@ -145,6 +154,7 @@
     WRITE(*,*) "At a rate of (levels/second)", nall/(t2-t1)
     WRITE(*,*) "Total levels considered :", nall
     WRITE(*,*) "Total levels in range   :", ngood
+    !WRITE(*,*) "Total collisions        :", col
     WRITE(*,*) "-----------------------------------------"
 
     !-------------------------
@@ -179,12 +189,15 @@
     l2 = nvib(2)+nvib(3)
     CALL hash_qinit_1Dint4_bool(A,B,C,l1,l2)
 
+    !col = 0
+
     !open unformatted binary file for writing, and do search
     WRITE(*,*) 
     WRITE(*,*) "-----------------------------------------"
     WRITE(*,*) "Starting recursive search" 
     OPEN(unit=2,file="AB+.bin",status='replace',access='sequential',form='unformatted')
     CALL recall_HO(N1,W1,ids(1,:),A,B,C,Etot+Etol,Etot-Etol,Esys,0,nall,ngood,l1,l2)
+    !CALL recall_HO(N1,W1,ids(1,:),A,B,C,Etot+Etol,Etot-Etol,Esys,0,nall,ngood,l1,l2,col)
     CLOSE(unit=2)
 
     !write results to non binary file
@@ -208,6 +221,7 @@
     WRITE(*,*) "At a rate of (levels/second)", nall/(t3-t2)
     WRITE(*,*) "Total levels considered :", nall
     WRITE(*,*) "Total levels in range   :", ngood
+    !WRITE(*,*) "Total collisions        :", col
     WRITE(*,*) "-----------------------------------------"
 
 
