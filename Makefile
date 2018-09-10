@@ -1,4 +1,4 @@
-myutil=/home/james.thorpe/bin/myUtils/lib
+myutil=/Users/jamesthorpe/local-hbar/myUtils/lib
 FC=gfortran
 #FC=ifort
 FFALGS= -fcheck=bounds -O3
