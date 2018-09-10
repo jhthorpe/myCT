@@ -5,28 +5,29 @@
     ! Wi        :       2D real4, array of vibrational frequencies of
     ! molecules
     ! nvib      :       1D int, array of number of vibrational modes
-    ! Eelc      :       1D real4, array of elc energies in cm-1
+    ! E_elc      :       1D real4, array of elc energies in cm-1
     ! names     :       1D chr*2, array of molecule names for
     ! convenience
     ! Etol      :       real4, tolerance energy in cm-1
-    ! Eint      :       real4, intitial internal energy
+    ! E_int      :       real4, intitial internal energy
     ! mqn       :       int, max quantum number
     ! options   :       1D int, list of options
     ! Ngues     :       2D int4, initial guess array [rcts/prds,levels]
     ! T		:	real4, temperature in K
+    ! E_rel	:	real4, max energy relative to reactants
 
-  SUBROUTINE input(nvib,Eelc,Etol,Wi,names,Eint,mqn,options,Ngues,T,Emax,dE,nX)
+  SUBROUTINE input(nvib,E_elc,Etol,Wi,names,E_int,mqn,options,Ngues,T,E_rel,dE,nX)
     IMPLICIT NONE
 
     INTEGER(KIND=4), DIMENSION(:,:), ALLOCATABLE, INTENT(INOUT) :: Ngues
     REAL(KIND=4), DIMENSION(:,:), ALLOCATABLE, INTENT(INOUT) :: Wi
     INTEGER(KIND=4), DIMENSION(0:), INTENT(INOUT) :: nvib
     CHARACTER(LEN=2), DIMENSION(0:), INTENT(IN) :: names
-    REAL(KIND=4), DIMENSION(0:), INTENT(INOUT) :: Eelc
+    REAL(KIND=4), DIMENSION(0:), INTENT(INOUT) :: E_elc
     INTEGER, DIMENSION(0:), INTENT(INOUT) :: options
     CHARACTER(LEN=6), DIMENSION(0:3) :: fnames
     INTEGER(KIND=4), INTENT(INOUT) :: mqn,nX
-    REAL(KIND=4), INTENT(INOUT) :: Etol,Eint,T,Emax,dE
+    REAL(KIND=4), INTENT(INOUT) :: Etol,E_int,T,E_rel,dE
 
     LOGICAL :: ex
     INTEGER :: i,j,k
@@ -45,20 +46,20 @@
       READ(1,*)
       READ(1,*) options(1)
       READ(1,*)
-      READ(1,*) Eelc(0)
-      READ(1,*) Eelc(1)
-      READ(1,*) Eelc(2)
-      READ(1,*) Eelc(3)
+      READ(1,*) E_elc(0)
+      READ(1,*) E_elc(1)
+      READ(1,*) E_elc(2)
+      READ(1,*) E_elc(3)
       READ(1,*)
       READ(1,*) Etol
-      READ(1,*) Eint
+      READ(1,*) E_int
       READ(1,*)
       READ(1,*) mqn
       READ(1,*) 
       READ(1,*) 
       READ(1,*) options(2)
       READ(1,*) T
-      READ(1,*) Emax
+      READ(1,*) E_rel
       READ(1,*) dE
       READ(1,*) nX
       READ(1,*) options(3)
@@ -99,10 +100,9 @@
 
     !quantum print 
     WRITE(*,*) "---------- Quantum Treatment ----------"
+    WRITE(*,*) 
     IF (options(1) .NE. 0) THEN
-      
-      WRITE(*,*)
-      WRITE(*,*) "Initial Internal Energy (cm-1) : ", Eint
+      WRITE(*,*) "Quantum treatment	: Average Energy"
       WRITE(*,*) "Energy Tolerance (cm-1) :", Etol
       WRITE(*,*)
       IF (ALLOCATED(Ngues)) THEN
@@ -130,13 +130,13 @@
         WRITE(*,*) "Temperature (K)	:", T
       END IF
       IF (options(2) .EQ. 2) THEN
-        WRITE(*,*) "Statistical treatment	: Energy Distribution"
-        WRITE(*,*) "Temperature (K)	:", T
-        WRITE(*,*) "Max energy (cm-1)	:", Emax
-        WRITE(*,*) "Energy binsize (cm-1)	:", dE
-        WRITE(*,*) "Fraction bins		:", nX 
-        IF (options(3) .EQ. 0) WRITE(*,*) "Density treatment	: External"
-        IF (options(3) .EQ. 1) WRITE(*,*) "Density treatment	: HO"
+        WRITE(*,*) "Statistical treatment		: Energy Distribution"
+        WRITE(*,*) "Temperature (K)			:", T
+        WRITE(*,*) "Max energy rel. to rcts (cm-1)	:", E_rel
+        WRITE(*,*) "Energy binsize (cm-1)		:", dE
+        WRITE(*,*) "Fraction bins			:", nX 
+        IF (options(3) .EQ. 0) WRITE(*,*) "Density treatment		: External"
+        IF (options(3) .EQ. 1) WRITE(*,*) "Density treatment		: HO"
       END IF
     ELSE
       WRITE(*,*) "No statistical treatment requested"
@@ -148,9 +148,14 @@
     WRITE(*,*) 
     IF (options(0) .EQ.0 ) WRITE(*,*) "Vibrational Frequencies : Harmonic"  
     WRITE(*,*) 
+    WRITE(*,*) "REACTANTS"
     DO i=0,3
+      IF (i .EQ. 2) THEN
+        WRITE(*,*) 
+        WRITE(*,*) "PRODUCTS"
+      END IF
       WRITE(*,*) names(i)
-      WRITE(*,*) "Electronic Energy (cm-1) :", Eelc(i)
+      WRITE(*,*) "Electronic Energy (cm-1) :", E_elc(i)
       WRITE(*,*) 
       IF (options(0) .EQ. 0 .OR. options(0) .EQ. 1) THEN
         WRITE(*,*) "Harmonic Frequencies"   
@@ -159,6 +164,10 @@
         END DO
       END IF
       WRITE(*,*) 
+      IF (i .EQ. 1) THEN
+
+        WRITE(*,*) "Extra internal energy (cm-1):", E_int
+      END IF
     END DO
 
   END SUBROUTINE input

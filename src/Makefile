@@ -26,5 +26,5 @@ levels_HO.o: levels_HO.f90 init_HO.o recall_HO.o
 recall_HO.o: recall_HO.f90 energy_HO.o hash_1Dint4.o
 	$(FC) $(FFLAGS) -c recall_HO.f90 energy_HO.o hash_1Dint4.o $(myutil)/myUtils.a -I$(myutil)
 
-stat_model.o: stat_model.f90
-	$(FC) $(FFLAGS) -c stat_model.f90
+stat_model.o: stat_model.f90 energy_HO.o
+	$(FC) $(FFLAGS) -c stat_model.f90 energy_HO.o

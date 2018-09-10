@@ -7,7 +7,7 @@
 0	#Vibrational analysis
 
 #Quantum Treatment
-1	#Quantum Treatment options
+0	#Quantum Treatment options
 
 6500.0	#SPE of A+ (cm-1)
 0.0	#SPE of B  (cm-1)
@@ -20,7 +20,7 @@
 10	#max quantum number to consider
 
 #Statistical Treatment
-2	#stat model options
+1	#stat model options
 300	#temperature (K)
 10000	#max energy to consider (cm-1)
 10	#energy stepsize (cm-1)
