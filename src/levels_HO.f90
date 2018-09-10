@@ -94,7 +94,7 @@
     ids(0,nvib(0):nvib(0)+nvib(1)-1) = (/ (1, i=0, nvib(1)-1) /)
 
     !Find starting point for the calculation of A+ & B levels
-    WRITE(*,*) "-----------------------------------------"
+    WRITE(*,*) "=============================================================="
     WRITE(*,*) "Starting search for levels of A+ and B"
 
     Esys = Eelc(0) + Eelc(1)

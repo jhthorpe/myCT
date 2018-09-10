@@ -20,7 +20,7 @@
 10	#max quantum number to consider
 
 #Statistical Treatment
-2	#stat model options
+1	#stat model options
 300	#temperature (K)
 10000	#max energy to consider (cm-1)
 10	#energy stepsize (cm-1)
