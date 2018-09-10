@@ -24,6 +24,9 @@ PROGRAM ct
       REAL(KIND=4), DIMENSION(0:), INTENT(IN) :: a2
       REAL(KIND=4), INTENT(IN) :: a3,a6
     END SUBROUTINE levels_HO
+
+    SUBROUTINE stat_model()
+    END SUBROUTINE stat_model()
   END INTERFACE 
  
   INTEGER(KIND=4), DIMENSION(:,:), ALLOCATABLE :: ids,Ngues
@@ -48,6 +51,7 @@ PROGRAM ct
   names = ['A+', 'B ', 'A ', 'B+']
 
   CALL input(nvib,Eelc,Etol,Wi,names,Eint,mqm,options,Ngues)
+  CALL stat_model(nvib,Eelc,Wi,names,Eint,options)
   IF (options(0) .EQ. 0) THEN
     CALL levels_HO(nvib,Eelc,Etol,Wi,names,Eint,Ngues)
   END IF
