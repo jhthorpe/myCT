@@ -1,7 +1,7 @@
-myutil=/Users/jamesthorpe/local-hbar/myUtils/lib
+myutil=/home/james.thorpe/bin/myUtils/lib
 FC=gfortran
 #FC=ifort
-FFLAGS= -fcheck=bounds -O3
+FFLAGS= -fcheck=bounds -O3 -frecursive
 
 objects = input.o energy_HO.o energy_VPT2.o hash_1Dint4.o recall_HO.o levels_HO.o init_HO.o stat_model.o
 

@@ -42,7 +42,7 @@ SUBROUTINE stat_model(E_rel,dE,nX,T,options,nvib,Wi,E_elc,Eint)
   INTEGER(KIND=4), DIMENSION(:), ALLOCATABLE :: N
   REAL(KIND=4), DIMENSION(:,:), ALLOCATABLE :: dens
   INTEGER(KIND=4) :: max_idx,dummy
-  REAL(KIND=4) :: t1,t2,A_conv,B_conv,A_enr,B_enr,E_int,E_tot
+  REAL(KIND=4) :: t1,t2,A_conv,B_conv,A_enr,B_enr,E_int,E_tot,dum
   INTEGER :: i,j,k
 
   CALL CPU_TIME(t1)
@@ -97,8 +97,8 @@ SUBROUTINE stat_model(E_rel,dE,nX,T,options,nvib,Wi,E_elc,Eint)
   OPEN(unit=50,file='A.dens',access='sequential',status='old')
   OPEN(unit=51,file='B+.dens',access='sequential',status='old')
   DO i=0,max_idx
-    READ(50,*) dummy,dummy,dens(0,i) 
-    READ(51,*) dummy,dummy,dens(1,i) 
+    READ(50,*) dummy,dum,dens(0,i),dum 
+    READ(51,*) dummy,dum,dens(1,i),dum
   END DO
   CLOSE(unit=51,status='keep')
   CLOSE(unit=50,status='keep')
