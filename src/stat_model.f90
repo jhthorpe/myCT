@@ -86,7 +86,7 @@ SUBROUTINE stat_model(E_rel,dE,nX,T,options,nvib,Wi,E_elc,Eint)
     E_int = E_int - (E_elc(3) + energy_HO(N,Wi(3,:),nvib(3)))
     DEALLOCATE(N)
   END IF
-  WRITE(*,*) "Total internal (cm-1)	:", E_int
+  WRITE(*,*) "Total internal (cm-1)	        :", E_int
 
   !The following statistical models were developed by T. Lam Nguyen
 
@@ -123,8 +123,8 @@ SUBROUTINE stat_model(E_rel,dE,nX,T,options,nvib,Wi,E_elc,Eint)
   !Average energy analysis
   WRITE(*,*) "< E_A > (cm-1) 		:", A_enr/A_conv
   WRITE(*,*) "< E_B > (cm-1) 		:", B_enr/B_conv
-  WRITE(*,*) " E_A %			:", A_enr/A_conv/E_int*100
-  WRITE(*,*) " E_B %			:",B_enr/B_conv/E_int*100
+  WRITE(*,*) " E_A %			        :", A_enr/A_conv/E_int*100
+  WRITE(*,*) " E_B %			        :",B_enr/B_conv/E_int*100
 !  WRITE(*,*) "A conv, B conv", A_conv,B_conv
 !  WRITE(*,*) "from differences :", E_int-(A_enr/A_conv)
 
